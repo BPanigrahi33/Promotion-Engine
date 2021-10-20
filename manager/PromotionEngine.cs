@@ -1,4 +1,5 @@
-﻿using Promotion_Engine.Model.Carts;
+﻿using Promotion_Engine.Model;
+using Promotion_Engine.Model.Carts;
 using Promotion_Engine.Model.Promotions;
 using Promotion_Engine.Util;
 using System;
@@ -15,13 +16,16 @@ namespace Promotion_Engine.manager
             int discount = 0;
             var discountedCart = cart.Clone();
 
-            promotions.forEach(promotion =>
+            promotions.ToList().ForEach(promotion =>
             {
                 if (promotion.IsApplicable(discountedCart))
                 {
-                    var promotionResult = promotion.calculateDiscount(discountedCart);
-                    discount = discount + promotionResult[0];
-                    discountedCart = promotionResult[1];
+                    Dictionary<ICart, int> promotionResult = promotion.CalculateDiscount(discountedCart);
+                    foreach (KeyValuePair<ICart, int> element in promotionResult)
+                    {
+                        discount = discount + element.Value;
+                        discountedCart = element.Key;
+                    }
                 }
             });
 

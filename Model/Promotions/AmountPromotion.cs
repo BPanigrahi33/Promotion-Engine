@@ -22,20 +22,24 @@ namespace Promotion_Engine.Model.Promotions
         public Dictionary<ICart, int> CalculateDiscount(ICart cart)
         {
             int discount = 0;
-            if (cart.GetCartItems().ToValueTuple(this.Products))
+            Dictionary<ICart, int> dicData = new Dictionary<ICart, int>();
+
+            if (cart.GetCartItems().ContainsKey(this.Products))
             {
-                var cartAmount = cart.GetCartItems().ToValueTuple(this.Products) as int;
+                int cartAmount = cart.GetCartItems().GetValueOrDefault(this.Products);
 
                 if (cartAmount >= this.Amount)
                 {
-                    var amountOfDiscountBundles = Math.Floor(cartAmount / this.Amount);
+                    var amountOfDiscountBundles = Math.Abs(cartAmount / this.Amount);
                     var newPrice = amountOfDiscountBundles * this.DiscountedPrice + this.Products.Price * (cartAmount - amountOfDiscountBundles * this.Amount);
-                    var oldPrice = (cart.GetCartItems().ToValueTuple(this.Products) as int) * this.Products.Price;
+                    var oldPrice = cart.GetCartItems().GetValueOrDefault(this.Products) * this.Products.Price;
                     discount = oldPrice - newPrice;
                     cart.UpdateProductAmount(this.Products, (cartAmount - amountOfDiscountBundles * this.Amount));
                 }
+
+                dicData.Add(cart, discount);
             }
-            return [cart, discount];
+            return dicData;
         }
 
         public string GetOverview()
@@ -45,9 +49,9 @@ namespace Promotion_Engine.Model.Promotions
 
         public bool IsApplicable(ICart cart)
         {
-            if (cart.GetCartItems().containsKey(this.Products))
+            if (cart.GetCartItems().ContainsKey(this.Products))
             {
-                var cartAmount = cart.GetCartItems().getValue(this.Products) as int;
+                var cartAmount = cart.GetCartItems().GetValueOrDefault(this.Products);
                 return cartAmount >= this.Amount;
             }
 

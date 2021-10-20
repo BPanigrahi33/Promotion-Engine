@@ -39,17 +39,16 @@ namespace Promotion_Engine.Model.Promotions
         public bool DoesCartHaveAllProducts(ICart cart)
         {
             bool allProducts = true;
-            this.requiredItems.Keys(element =>
+
+            foreach (KeyValuePair<Product, int> element in this.requiredItems)
             {
-                const reqAmount = this.getRequiredProductAmount(element);
-                if (
-                  !cart.hasProduct(element) ||
-                  reqAmount > cart.getProductAmount(element)
-                )
+                var reqAmount = this.getRequiredProductAmount(element.Key);
+                if (!cart.HasProduct(element.Key) || reqAmount > cart.GetProductAmount(element.Key))
                 {
                     allProducts = false;
                 }
-            });
+            }
+
             return allProducts;
         }
         public bool IsApplicable(ICart cart)
@@ -59,40 +58,46 @@ namespace Promotion_Engine.Model.Promotions
 
         public Dictionary<ICart, int> CalculateDiscount(ICart cart)
         {
+            Dictionary<ICart, int> dicData = new Dictionary<ICart, int>();
             if (!this.DoesCartHaveAllProducts(cart))
             {
-                return [cart, 0];
+                dicData.Add(cart, 0);
+                return dicData;
             }
 
             int oldPrice = 0;
             int counter = 0;
-            this.requiredItems.forEach(requiredProduct =>
+
+            foreach (KeyValuePair<Product, int> requiredProduct in this.requiredItems)
             {
                 counter++;
-                var requiredAmount = this.requiredItems.getValue(requiredProduct)!;
-                var totalPrice = requiredProduct.Price * requiredAmount;
+                var requiredAmount = this.requiredItems.GetValueOrDefault(requiredProduct.Key)!;
+                var totalPrice = requiredProduct.Value * requiredAmount;
                 oldPrice = oldPrice + totalPrice;
-                cart.updateProductAmount(requiredProduct, requiredAmount);
-                if (counter < this.requiredItems.size())
+                cart.UpdateProductAmount(requiredProduct.Key, requiredAmount);
+                if (counter < this.requiredItems.Count())
                 {
-                    cart.updateProductPrice(requiredProduct, 0);
+                    cart.UpdateProductPrice(requiredProduct.Key, 0);
                 }
                 else
                 {
-                    cart.updateProductPrice(requiredProduct, this.bundlePrice);
+                    cart.UpdateProductPrice(requiredProduct.Key, this.bundlePrice);
                 }
-            });
+            }
 
             var discount = oldPrice - this.bundlePrice;
-            return [cart, discount];
+            dicData.Add(cart, discount);
+            return dicData;
         }
 
         public string GetOverview()
         {
             string overview = "Bundle promotion( + " + this.bundlePrice + ")";
-            this.requiredItems.forEach(requiredProduct => {
-                overview += requiredProduct.Sku;
-            });
+            foreach (KeyValuePair<Product, int> requiredProduct in this.requiredItems)
+            {
+                overview += requiredProduct.Key.Sku;
+            }
+
             return overview;
         }
     }

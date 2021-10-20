@@ -27,9 +27,11 @@ namespace Promotion_Engine.Model.Carts
         public ICart Clone()
         {
             var newCart = new BasicCart();
-            this.cartItems.forEach((product, amount) => {
-                newCart.add(product, amount);
-            });
+            foreach (KeyValuePair<Product, int> element in this.cartItems)
+            {
+                newCart.Add(element.Key, element.Value);
+            }
+
             return newCart;
         }
 
@@ -40,9 +42,12 @@ namespace Promotion_Engine.Model.Carts
 
         public string GetOverview()
         {
-            string overview;
-            this.cartItems.forEach((product, amount) => {
-                overview = product.Sku + "*" + amount + "(total " + product.Price + "*" + amount + ")"; });
+            string overview = null;
+            foreach (KeyValuePair<Product, int> element in this.cartItems)
+            {
+                overview = element.Key.Sku + "*" + element.Value + "(total " + element.Key.Price + "*" + element.Value + ")";
+            }
+
             return overview;
         }
 
@@ -61,9 +66,11 @@ namespace Promotion_Engine.Model.Carts
         public int GetTotalCount()
         {
             int totalCount = 0;
-            this.cartItems.forEach((product, amount) => {
-                totalCount = totalCount + amount;
-            });
+            foreach (KeyValuePair<Product, int> element in this.cartItems)
+            {
+                totalCount = totalCount + element.Value;
+            }
+
             return totalCount;
         }
 

@@ -1,4 +1,5 @@
-﻿using Promotion_Engine.Model.Carts;
+﻿using Promotion_Engine.Model;
+using Promotion_Engine.Model.Carts;
 using Promotion_Engine.Util;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,13 @@ namespace Promotion_Engine.manager
         public int getTotalPrice(ICart cart)
         {
             int totalPrice = 0;
-            cart.GetCartItems().forEach((product, amount) =>
+            foreach (KeyValuePair<Product, int> element in cart.GetCartItems())
             {
-                totalPrice = totalPrice + product.price * amount;
-            });
+                totalPrice = totalPrice + element.Key.Price * element.Value;
+            }
+
             return totalPrice;
         }
     }
 }
-}
+
